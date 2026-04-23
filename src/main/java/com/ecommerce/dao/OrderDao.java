@@ -19,7 +19,7 @@ public class OrderDao extends BaseDao {
     public List<Order> findByUser(User user) {
         return executeInTransaction(session -> {
             Query<Order> query = session.createQuery(
-                    "select distinct o from Order o "
+                    "select distinct o from com.ecommerce.model.Order o "
                             + "left join fetch o.user "
                             + "left join fetch o.items i "
                             + "left join fetch i.product "
@@ -32,7 +32,7 @@ public class OrderDao extends BaseDao {
     public List<Order> findAll() {
         return executeInTransaction(
                 session -> session.createQuery(
-                                "select distinct o from Order o "
+                    "select distinct o from com.ecommerce.model.Order o "
                                         + "left join fetch o.user "
                                         + "left join fetch o.items i "
                                         + "left join fetch i.product "
@@ -44,7 +44,7 @@ public class OrderDao extends BaseDao {
     public Optional<Order> findByIdAndUser(Long orderId, User user) {
         return executeInTransaction(session -> {
             Query<Order> query = session.createQuery(
-                    "select distinct o from Order o "
+                    "select distinct o from com.ecommerce.model.Order o "
                             + "left join fetch o.user "
                             + "left join fetch o.items i "
                             + "left join fetch i.product "

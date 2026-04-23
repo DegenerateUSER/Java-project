@@ -17,7 +17,11 @@ public abstract class BaseDao {
             return result;
         } catch (RuntimeException ex) {
             if (tx != null) {
-                tx.rollback();
+                try {
+                    tx.rollback();
+                } catch (RuntimeException rollbackEx) {
+                    ex.addSuppressed(rollbackEx);
+                }
             }
             throw ex;
         }

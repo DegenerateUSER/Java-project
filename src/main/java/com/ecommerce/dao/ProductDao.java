@@ -16,13 +16,15 @@ public class ProductDao extends BaseDao {
     }
 
     public List<Product> findAll() {
-        return executeInTransaction(session -> session.createQuery("from Product", Product.class).list());
+        return executeInTransaction(
+                session -> session.createQuery("from com.ecommerce.model.Product", Product.class).list());
     }
 
     public List<Product> search(String keyword) {
         return executeInTransaction(session -> {
             Query<Product> query = session.createQuery(
-                    "from Product p where lower(p.name) like :q or lower(p.category) like :q", Product.class);
+                    "from com.ecommerce.model.Product p where lower(p.name) like :q or lower(p.category) like :q",
+                    Product.class);
             query.setParameter("q", "%" + keyword.toLowerCase() + "%");
             return query.list();
         });

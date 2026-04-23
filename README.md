@@ -41,7 +41,13 @@ This runs tests and full build verification.
 
 ## Run
 
-Deploy generated WAR to Tomcat 10.
+Deploy generated WAR to Tomcat.
+
+Application URL:
+
+- `http://localhost:8081/distributed-ecommerce-1.0.0/`
+
+If `localhost:8080` is already used by another service (for example nginx), set Tomcat HTTP connector to port `8081` in Tomcat `server.xml`.
 
 Default routes:
 

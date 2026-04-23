@@ -19,7 +19,8 @@ public class CartDao extends BaseDao {
     public List<CartItem> findByUser(User user) {
         return executeInTransaction(session -> {
             Query<CartItem> query = session.createQuery(
-                    "select c from CartItem c join fetch c.product where c.user = :user", CartItem.class);
+                    "select c from com.ecommerce.model.CartItem c join fetch c.product where c.user = :user",
+                    CartItem.class);
             query.setParameter("user", user);
             return query.list();
         });
@@ -34,7 +35,8 @@ public class CartDao extends BaseDao {
 
     public void clearByUser(User user) {
         executeInTransaction(session -> {
-            MutationQuery query = session.createMutationQuery("delete from CartItem c where c.user = :user");
+            MutationQuery query =
+                    session.createMutationQuery("delete from com.ecommerce.model.CartItem c where c.user = :user");
             query.setParameter("user", user);
             query.executeUpdate();
             return null;

@@ -18,7 +18,8 @@ public class UserDao extends BaseDao {
 
     public Optional<User> findByEmail(String email) {
         return executeInTransaction(session -> {
-            Query<User> query = session.createQuery("from User where email = :email", User.class);
+            Query<User> query = session.createQuery(
+                    "from com.ecommerce.model.User where email = :email", User.class);
             query.setParameter("email", email);
             return query.uniqueResultOptional();
         });
@@ -29,12 +30,14 @@ public class UserDao extends BaseDao {
     }
 
     public List<User> findAll() {
-        return executeInTransaction(session -> session.createQuery("from User", User.class).list());
+        return executeInTransaction(
+                session -> session.createQuery("from com.ecommerce.model.User", User.class).list());
     }
 
     public void updateRole(Long userId, String role) {
         executeInTransaction(session -> {
-            MutationQuery query = session.createMutationQuery("update User u set u.role = :role where u.userId = :userId");
+            MutationQuery query = session.createMutationQuery(
+                    "update com.ecommerce.model.User u set u.role = :role where u.userId = :userId");
             query.setParameter("role", role);
             query.setParameter("userId", userId);
             query.executeUpdate();
