@@ -1,0 +1,11 @@
+.git
+.gitignore
+.idea
+.vscode
+
+**/target
+**/.DS_Store
+
+README.md
+docs
+submission

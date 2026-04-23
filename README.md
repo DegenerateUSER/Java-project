@@ -84,6 +84,120 @@ Example alternate port:
 
 - `http://localhost:8081/distributed-ecommerce-1.0.0/`
 
+## Run with Docker
+
+Build image:
+
+```bash
+docker build -t distributed-ecommerce:1.0.0 .
+```
+
+Run container:
+
+```bash
+docker run --rm -p 8080:8080 \
+	-e DB_URL=jdbc:postgresql://<db-host>:5432/ecommerce_db \
+	-e DB_USERNAME=<db-user> \
+	-e DB_PASSWORD=<db-password> \
+	distributed-ecommerce:1.0.0
+```
+
+Container app URL:
+
+- `http://localhost:8080/`
+
+Note: In Docker, the app is deployed as `ROOT.war`, so routes are directly `/login`, `/products`, etc.
+
+## Deploy to Azure (Docker + App Service)
+
+This project includes a `Dockerfile`, so it can be deployed to Azure as a custom container.
+
+Quick option (automated script):
+
+```bash
+./scripts/deploy-azure-webapp.sh \
+	--subscription "<subscription-id-or-name>" \
+	--resource-group "ecommerce-rg" \
+	--location "eastus" \
+	--acr "<globally-unique-acr-name>" \
+	--plan "ecommerce-linux-plan" \
+	--app "<globally-unique-webapp-name>" \
+	--db-url "jdbc:postgresql://<db-host>:5432/ecommerce_db" \
+	--db-username "<db-user>" \
+	--db-password "<db-password>"
+```
+
+Manual option (step-by-step):
+
+1. Log in and set subscription:
+
+```bash
+az login
+az account set --subscription "<subscription-id-or-name>"
+```
+
+2. Define names:
+
+```bash
+RG="ecommerce-rg"
+LOC="eastus"
+ACR="ecommerceacr$RANDOM"
+PLAN="ecommerce-linux-plan"
+APP="ecommerce-web-$RANDOM"
+IMAGE="distributed-ecommerce:1.0.0"
+```
+
+3. Create Azure resources:
+
+```bash
+az group create -n "$RG" -l "$LOC"
+az acr create -g "$RG" -n "$ACR" --sku Basic
+az appservice plan create -g "$RG" -n "$PLAN" --is-linux --sku B1
+```
+
+4. Build and push image using ACR build:
+
+```bash
+az acr build -r "$ACR" -t "$IMAGE" .
+```
+
+5. Create Web App from container image:
+
+```bash
+az webapp create -g "$RG" -p "$PLAN" -n "$APP" \
+	--deployment-container-image-name "$ACR.azurecr.io/$IMAGE"
+```
+
+6. Configure app settings (DB + container port):
+
+```bash
+az webapp config appsettings set -g "$RG" -n "$APP" --settings \
+	WEBSITES_PORT=8080 \
+	DB_URL="jdbc:postgresql://<db-host>:5432/ecommerce_db" \
+	DB_USERNAME="<db-user>" \
+	DB_PASSWORD="<db-password>"
+```
+
+7. Enable ACR pull from Web App identity:
+
+```bash
+az webapp identity assign -g "$RG" -n "$APP"
+PRINCIPAL_ID=$(az webapp identity show -g "$RG" -n "$APP" --query principalId -o tsv)
+ACR_ID=$(az acr show -g "$RG" -n "$ACR" --query id -o tsv)
+az role assignment create --assignee "$PRINCIPAL_ID" --scope "$ACR_ID" --role AcrPull
+```
+
+8. Restart and open app:
+
+```bash
+az webapp restart -g "$RG" -n "$APP"
+az webapp show -g "$RG" -n "$APP" --query defaultHostName -o tsv
+```
+
+App URL format:
+
+- `https://<your-app-name>.azurewebsites.net/`
+
 Default routes:
 
 - `/register`
